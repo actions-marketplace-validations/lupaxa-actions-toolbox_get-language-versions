@@ -1,4 +1,4 @@
-name: 'Get Latest Language Versions'
+name: 'Get Language Versions'
 description: 'Return the latest runtime versions for a programming language'
 branding:
   icon: "tag"

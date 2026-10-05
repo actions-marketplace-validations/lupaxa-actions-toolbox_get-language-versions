@@ -29,7 +29,7 @@ permissions:
 
 jobs:
   test-output-method-setup:
-    name: Min Version 24
+    name: Min Version 26
     runs-on: ubuntu-latest
     outputs:
       version-matrix: ${{ steps.get-versions.outputs.latest-versions }}
@@ -42,10 +42,10 @@ jobs:
         id: get-versions
         with:
           language: node
-          min-version: "24"
+          min-version: "26"
 
   test-output-method-load:
-    name: Min Version 24
+    name: Min Version 26
     needs:
       - test-output-method-setup
     runs-on: ubuntu-latest

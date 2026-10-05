@@ -1,0 +1,53 @@
+name: 'Get Latest Language Versions'
+description: 'Return the latest runtime versions for a programming language'
+branding:
+  icon: "tag"
+  color: "gray-dark"
+inputs:
+  language:
+    description: 'Language to query: go, node, nodejs, perl, php, python, or ruby'
+    required: true
+  min-version:
+    description: 'Lowest major.minor version to include. Use eol for the oldest supported release, or all for every release.'
+    required: false
+    default: 'eol'
+  max-version:
+    description: 'Highest major.minor version to include, or latest for no upper bound.'
+    required: false
+    default: 'latest'
+  max-versions:
+    description: 'How many of the newest matching versions to return. 0 returns every match.'
+    required: false
+    default: '0'
+  include-prereleases:
+    description: 'Include prerelease versions. Cannot be combined with remove-patch-version.'
+    required: false
+    default: 'false'
+  highest-only:
+    description: 'Return only the highest matching version as a string. Otherwise return a JSON list.'
+    required: false
+    default: 'false'
+  remove-patch-version:
+    description: 'Return major.minor only. Cannot be combined with include-prereleases.'
+    required: false
+    default: 'false'
+  use-head:
+    description: 'Read the default branch instead of the latest GitHub release. Ignored for PHP.'
+    required: false
+    default: 'false'
+
+outputs:
+  latest-versions:
+    description: 'Highest version as a string when highest-only is true, otherwise a JSON list for fromJson'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.language }}
+    - ${{ inputs.min-version }}
+    - ${{ inputs.max-version }}
+    - ${{ inputs.include-prereleases }}
+    - ${{ inputs.highest-only }}
+    - ${{ inputs.remove-patch-version }}
+    - ${{ inputs.use-head }}
+    - ${{ inputs.max-versions }}

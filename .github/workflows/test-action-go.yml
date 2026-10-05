@@ -1,0 +1,164 @@
+name: Test Action (Go)
+
+on:
+  push:
+    paths:
+      - ".github/workflows/test-action-go.yml"
+      - "action.yml"
+      - "Dockerfile"
+      - "entrypoint.py"
+      - "pyproject.toml"
+
+  pull_request:
+    branches:
+      - "master"
+    paths:
+      - ".github/workflows/test-action-go.yml"
+      - "action.yml"
+      - "Dockerfile"
+      - "entrypoint.py"
+      - "pyproject.toml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  test-output-method-setup:
+    name: Min Version 1.17
+    runs-on: ubuntu-latest
+    outputs:
+      version-matrix: ${{ steps.get-versions.outputs.latest-versions }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - name: Get Versions
+        uses: ./
+        id: get-versions
+        with:
+          language: go
+          min-version: "1.17"
+
+  test-output-method-load:
+    name: Min Version 1.17
+    needs:
+      - test-output-method-setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: ${{ fromJson(needs.test-output-method-setup.outputs.version-matrix) }}
+    steps:
+      - name: Set Up Go ${{ matrix.version }}
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e  # v7.0.0
+        with:
+          go-version: ${{ matrix.version }}
+
+  test-output-method-setup-eol:
+    name: Min Version EOL
+    runs-on: ubuntu-latest
+    outputs:
+      version-matrix: ${{ steps.get-versions.outputs.latest-versions }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - name: Get Versions
+        uses: ./
+        id: get-versions
+        with:
+          language: go
+
+  test-output-method-load-eol:
+    name: Min Version EOL
+    needs:
+      - test-output-method-setup-eol
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: ${{ fromJson(needs.test-output-method-setup-eol.outputs.version-matrix) }}
+    steps:
+      - name: Set Up Go ${{ matrix.version }}
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e  # v7.0.0
+        with:
+          go-version: ${{ matrix.version }}
+
+  test-output-method-setup-highest-only:
+    name: Highest Version Only
+    runs-on: ubuntu-latest
+    outputs:
+      highest-version: ${{ steps.get-versions.outputs.latest-versions }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - name: Get Versions
+        uses: ./
+        id: get-versions
+        with:
+          language: go
+          highest-only: true
+
+  test-output-method-load-highest-only:
+    name: Highest Version Only
+    needs:
+      - test-output-method-setup-highest-only
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Up Go ${{ needs.test-output-method-setup-highest-only.outputs.highest-version }}
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e  # v7.0.0
+        with:
+          go-version: ${{ needs.test-output-method-setup-highest-only.outputs.highest-version }}
+
+  test-output-method-setup-highest-only-strip-patch:
+    name: Highest Version Only (Strip Patch)
+    runs-on: ubuntu-latest
+    outputs:
+      highest-version: ${{ steps.get-versions.outputs.latest-versions }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - name: Get Versions
+        uses: ./
+        id: get-versions
+        with:
+          language: go
+          highest-only: true
+          remove-patch-version: true
+
+  test-output-method-load-highest-only-strip-patch:
+    name: Highest Version Only (Strip Patch)
+    needs:
+      - test-output-method-setup-highest-only-strip-patch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Up Go ${{ needs.test-output-method-setup-highest-only-strip-patch.outputs.highest-version }}
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e  # v7.0.0
+        with:
+          go-version: ${{ needs.test-output-method-setup-highest-only-strip-patch.outputs.highest-version }}
+
+  generate-workflow-summary:
+    name: Generate Workflow Summary
+    needs:
+      - test-output-method-load
+      - test-output-method-load-eol
+      - test-output-method-load-highest-only
+      - test-output-method-load-highest-only-strip-patch
+    if: always()
+    uses: the-lupaxa-project/workflows/.github/workflows/reusable-workflow-summary.yml@master
+
+  generate-workflow-notifications:
+    name: Generate Workflow Notifications
+    needs:
+      - generate-workflow-summary
+    if: always()
+    uses: the-lupaxa-project/workflows/.github/workflows/reusable-workflow-notifier.yml@master
+    with:
+      notify_on_results: "failure,timed_out"
+    secrets:
+      slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}

@@ -1,10 +1,14 @@
 name: Generate Release
 
 # Makefile mapping (bump-my-version tag v{version}):
-#   stable X.Y.Z  → this workflow (published release)
+#   stable X.Y.Z  → this workflow (draft release)
 #   X.Y.Z-rcN     → generate-test-release.yml (prerelease)
 #   X.Y.Z-devN    → no release workflow
-#   X.Y.Z-draftN  → generate-draft-release.yml (GitHub draft; not from Make)
+#   X.Y.Z-draftN  → generate-draft-release.yml (draft tag; not from Make)
+#
+# Stable tags are drafts because this repo uses immutable releases. Publish
+# the draft in the GitHub UI. Tick the Marketplace checkbox before publishing;
+# publishing is what makes the release immutable.
 
 on:
   push:
@@ -27,7 +31,7 @@ jobs:
     name: Generate Release Notes
     uses: the-lupaxa-project/workflows/.github/workflows/reusable-github-release-generator.yml@master
     with:
-      draft: false
+      draft: true
       prerelease: false
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}

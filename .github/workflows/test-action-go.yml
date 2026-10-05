@@ -29,7 +29,7 @@ permissions:
 
 jobs:
   test-output-method-setup:
-    name: Min Version 1.17
+    name: Min Version 1.25
     runs-on: ubuntu-latest
     outputs:
       version-matrix: ${{ steps.get-versions.outputs.latest-versions }}
@@ -42,10 +42,10 @@ jobs:
         id: get-versions
         with:
           language: go
-          min-version: "1.17"
+          min-version: "1.25"
 
   test-output-method-load:
-    name: Min Version 1.17
+    name: Min Version 1.25
     needs:
       - test-output-method-setup
     runs-on: ubuntu-latest

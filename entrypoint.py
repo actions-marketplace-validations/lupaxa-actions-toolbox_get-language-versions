@@ -34,7 +34,7 @@ SOURCES: dict[str, dict[str, str]] = {
     "perl": {
         "releases_url": "https://github.com/shogo82148/actions-setup-perl/releases/latest/",
         "head_branch": "main",
-        "versions_url": "https://raw.githubusercontent.com/shogo82148/actions-setup-perl/LATEST_TAG/versions/linux.json",
+        "versions_url": "https://raw.githubusercontent.com/shogo82148/actions-setup-perl/LATEST_TAG/src/versions/perl.json",
         "eol_url": "https://endoflife.date/api/perl.json",
     },
     "php": {
@@ -155,9 +155,7 @@ def is_version(value: str) -> bool:
 
 def extract_versions(language: str, payload: list[object] | dict[str, object]) -> list[str]:
     """Pull version strings out of a language-specific payload."""
-    if language == "perl":
-        candidates = [str(version) for version in payload]
-    elif language == "php":
+    if language == "php":
         candidates = [
             f"{item['major']}.{item['minor']}.{item['release']}"
             for item in version_records(payload)

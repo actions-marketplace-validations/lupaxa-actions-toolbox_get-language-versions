@@ -29,7 +29,7 @@ permissions:
 
 jobs:
   test-output-method-setup:
-    name: Min Version 3.8
+    name: Min Version 3.10
     runs-on: ubuntu-latest
     outputs:
       version-matrix: ${{ steps.get-versions.outputs.latest-versions }}
@@ -42,10 +42,10 @@ jobs:
         id: get-versions
         with:
           language: python
-          min-version: "3.8"
+          min-version: "3.10"
 
   test-output-method-load:
-    name: Min Version 3.8
+    name: Min Version 3.10
     needs:
       - test-output-method-setup
     runs-on: ubuntu-latest
